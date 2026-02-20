@@ -18,11 +18,12 @@ var (
 // liveserve ~/app/index.html
 // liveserve ~/app
 func handleArgs() error {
-	if len(os.Args) < 2 {
-		return nil
+	path := "."
+	if len(os.Args) > 1 {
+		path = os.Args[1]
 	}
 
-	absPath, err := filepath.Abs(os.Args[1])
+	absPath, err := filepath.Abs(path)
 	if err != nil {
 		log.Println("E: Could not parse absolute path", err.Error())
 		return err
@@ -50,8 +51,10 @@ func main() {
 		return
 	}
 
+	// headers to prevent default browser caching
 	switch OPT {
 	case "file":
+		fmt.Println("Serving file", PATH)
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 			w.Header().Set("Pragma", "no-cache")
@@ -60,9 +63,15 @@ func main() {
 		})
 
 	case "dir":
+		fmt.Println("Serving dir", PATH)
 		fs := http.FileServer(http.Dir(PATH))
-		http.Handle("/", fs)
+		http.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+			w.Header().Set("Pragma", "no-cache")
+			w.Header().Set("Expires", "0")
 
+			fs.ServeHTTP(w, r)
+		}))
 	}
 
 	fmt.Printf("Live at http://localhost:%s/\n", PORT)
