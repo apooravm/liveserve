@@ -1,6 +1,7 @@
 APP_TITLE := liveserve
 VERSION := 0.1.0
-APP_NAME := ${APP_TITLE}_v${VERSION}.exe
+# APP_NAME := ${APP_TITLE}_v${VERSION}.exe
+APP_NAME := ${APP_TITLE}.exe
 BUILD_ROUTE := ./bin/${APP_NAME}
 SRC_ROUTE := ./src/main.go
 
